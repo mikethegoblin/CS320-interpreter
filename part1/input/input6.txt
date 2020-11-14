@@ -1,0 +1,7 @@
+Push 200
+Push 3
+Mul
+Push "hello world"
+Push 4
+Div
+Quit

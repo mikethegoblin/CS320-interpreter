@@ -1,0 +1,5 @@
+Push "some texts"
+Push "32 34 56"
+Push <unit>
+Push <error>
+Quit

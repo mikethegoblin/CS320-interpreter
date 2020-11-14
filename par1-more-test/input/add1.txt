@@ -1,0 +1,6 @@
+Push 5
+Push 8
+Push -12
+Push 36
+Add
+Add

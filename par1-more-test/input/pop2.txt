@@ -1,0 +1,7 @@
+Push Pop
+Push name
+Pop
+Pop
+Pop
+Pop
+Pop

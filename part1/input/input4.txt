@@ -1,0 +1,6 @@
+Push 12
+Push 3
+Push 21
+Sub
+Add
+Quit

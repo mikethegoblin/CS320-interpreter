@@ -1,0 +1,7 @@
+Push 20
+Push <false>
+Push <false>
+Push "thisisastring"
+Push thisisastring
+Push <unit>
+Quit

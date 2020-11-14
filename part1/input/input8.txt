@@ -1,0 +1,12 @@
+Push 15
+Neg
+Neg
+Push <true>
+Push <unit>
+Neg
+Add
+Push -0
+Neg
+Mul
+Push -1
+Quit

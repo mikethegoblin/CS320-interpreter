@@ -1,0 +1,14 @@
+Pop
+Push 7
+Swap
+Push 3
+Add
+Pop
+Swap
+Pop
+Push -5
+Neg
+Mul
+Push 128
+Swap
+Quit

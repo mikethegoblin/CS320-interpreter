@@ -1,0 +1,9 @@
+Push 5
+Neg
+Push <true>
+Neg
+Push -0
+Neg
+Push "-100"
+Neg
+

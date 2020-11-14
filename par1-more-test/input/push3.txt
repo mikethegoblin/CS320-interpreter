@@ -1,0 +1,4 @@
+Push "Quit"
+Push Push
+Push 10
+Push <error>

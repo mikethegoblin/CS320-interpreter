@@ -1,0 +1,11 @@
+Push <false>
+Push <unit>
+Push name_constant
+Push "Hi there!"
+Push 45
+Push 67
+Add
+Push 22
+Rem
+Swap
+Quit

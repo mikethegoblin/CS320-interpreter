@@ -1,0 +1,5 @@
+Push 5
+Push <false>
+Push -10
+Push -100
+Sub

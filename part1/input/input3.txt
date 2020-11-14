@@ -1,0 +1,6 @@
+Push 23
+Push 35
+Push 2
+Pop
+Add
+Quit

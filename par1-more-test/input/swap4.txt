@@ -1,0 +1,6 @@
+Push "hello"
+Push "another string"
+Swap
+Pop
+Push <unit>
+Swap

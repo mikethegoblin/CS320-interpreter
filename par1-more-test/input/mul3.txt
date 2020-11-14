@@ -1,0 +1,3 @@
+Push "12"
+Push "-32"
+Mul

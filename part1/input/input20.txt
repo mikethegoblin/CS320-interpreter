@@ -1,0 +1,37 @@
+Pop
+Swap
+Push 31
+Pop
+Pop
+Pop
+Push -0
+Push 1
+Push "test twenty"
+Push "       test      "
+Push test_name
+Push ___name____20
+Push _constant
+Push <false>
+Push <true>
+Push <false>
+Push<unit>
+Push 21
+Push "89"
+Add
+Pop
+Pop
+Push 33
+Push 38
+Add
+Sub
+Push 5
+Push "42"
+Mul
+Push "32"
+Div
+Neg
+Pop
+Push 53
+Neg
+Swap
+Quit

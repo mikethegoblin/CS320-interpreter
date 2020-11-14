@@ -1,0 +1,15 @@
+Push 82
+Push 54
+Neg
+Add
+Push 61
+Sub
+Div
+Pop
+Push 56
+Mul
+Push 6
+Rem
+Pop
+Push test15
+Quit

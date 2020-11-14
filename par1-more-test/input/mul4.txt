@@ -1,0 +1,3 @@
+Push <unit>
+Push 5
+Mul
