@@ -1,0 +1,38 @@
+add type env:
+type env = Env of (const list * (const * const) list * bool)
+
+need to establish a global env list to hold all the existing envs
+
+change input to interpret_com function to (string, env)
+change return type of interpret_com function to env
+
+change input to all stack operation functions to env
+change return type of all stack operation functions to env
+
+If test Then coms Else coms EndIf
+
+If: create If & test env, push these 2 envs to the env list
+
+Then: 
+1. take top frame from test env (pop test env), set flag of if env to the test result
+2. create Then env
+
+Else:
+1. take top stack frame of Then env (pop Then env)
+2. check If env flag, if true, push result of Then env to If env, else discard result
+3. create Else env
+
+EndIf
+
+Another approach for If Then Else:
+If: create If & test env, push these 2 envs to env list
+
+Then:
+1. take top frame of test env (pop test env)
+2. create Then env, set flag to test result
+
+Else:
+1. check Then env flag, store in variable
+2. take top stack frame of Then env (pop Then env)
+3. create Else env
+4. Set flag to the opposite of Then env

@@ -11,6 +11,8 @@ type com = Push | Swap | Pop
           | And | Or | Not
           | Quit
 
+type env = Env of (const list * (const, const) Hashtbl.t * bool)
+
 let explode (s: string) : char list = 
   let rec expl i l = 
     if i < 0 then l 
@@ -42,13 +44,17 @@ let read_input_file (f_name: string): string list =
     | l -> if l <> "" then l :: read_lines ic else read_lines ic
   in read_lines ic
 
-let write_to_file (const_lst: const list) (f_name: string): unit = 
+let write_to_file (envr_lst: env list) (f_name: string): unit = 
   let oc = open_out f_name in 
+  let stack = 
+    (match envr_lst with
+    | Env (lst, _, _)::tl -> lst)
+  in 
   let rec write_str (oc: out_channel) (lst: const list): unit = 
     match lst with
     | [] -> close_out oc; ()
     | hd::tl -> Printf.fprintf oc "%s\n" (const_to_str hd); write_str oc tl
-  in write_str oc const_lst
+  in write_str oc stack
 
 (* function to check if the first character of a string is a quotation mark *)
 let fc_isq (str: string): bool = 
@@ -96,14 +102,21 @@ let is_zero (x: const): bool =
   | _ -> false
 
 (* function that performs pop operation on stack *)
-let pop_stack (stack: const list): const list = 
-  match stack with 
-  | [] -> let stack = Error ("<error>") :: stack in stack
-  | hd::tl -> tl
+let pop_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with 
+    | [] -> let lst = Error ("<error>") :: stack in (Env (lst, a, b) :: etl)
+    | hd::tl -> (Env (tl, a, b)) :: etl)
+
+(* helper function for pushing a const to the stack *)
+let push (x: const) (stack: const list): const list = x :: stack
 
 (* function that pushes a const to the stack *)
-let push_stack (x: const) (stack: const list): const list = 
-  x :: stack
+let push_stack (x: const) (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (lst, a, b)::tl -> (Env (push x lst, a, b))::tl
+  
 
 (* function that performs add operation on two int const *)
 let add (x: const) (y: const): const = 
@@ -111,11 +124,16 @@ let add (x: const) (y: const): const =
   | Int a, Int b -> Int (a+b)
 
 (* performs add command on the stack *)
-let add_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> 
-    (if is_int h1 && is_int h2 then (add h1 h2)::tl else push_stack (Error "<error>") stack )
-  | _ -> push_stack (Error "<error>") stack
+let add_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl ->
+      (if is_int h1 && is_int h2 then
+        (Env ((add h1 h2)::tl, a, b))::etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that performs subtraction on two int const *)
 let sub (x: const) (y: const): const = 
@@ -123,11 +141,16 @@ let sub (x: const) (y: const): const =
   | Int a, Int b -> Int (a-b)
 
 (* function that performs sub command on stack *)
-let sub_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> 
-    (if is_int h1 && is_int h2 then (sub h1 h2)::tl else push_stack (Error "<error>") stack)
-  | _ -> push_stack (Error "<error>") stack
+let sub_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl ->
+      (if is_int h1 && is_int h2 then
+        (Env ((sub h1 h2)::tl, a, b))::etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that performs multiplication on two int const *)
 let mul (x: const) (y: const): const = 
@@ -135,11 +158,16 @@ let mul (x: const) (y: const): const =
   | Int a, Int b -> Int (a*b)
 
 (* function that performs mul command on stack *)
-let mul_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> 
-    (if is_int h1 && is_int h2 then (mul h1 h2)::tl else push_stack (Error "<error>") stack)
-  | _ -> push_stack (Error "<error>") stack
+let mul_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl ->
+      (if is_int h1 && is_int h2 then
+        (Env ((mul h1 h2)::tl, a, b))::etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that performs int division on two int const *)
 let div (x: const) (y: const): const = 
@@ -147,11 +175,16 @@ let div (x: const) (y: const): const =
   | Int a, Int b -> Int (a / b)
 
 (* function that performs div command on stack *)
-let div_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> 
-    (if is_int h1 && is_int h2 && not (is_zero h2) then (div h1 h2)::tl else push_stack (Error "<error>") stack)
-  | _ -> push_stack (Error "<error>") stack
+let div_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl ->
+      (if is_int h1 && is_int h2 && not (is_zero h2) then
+        (Env ((div h1 h2)::tl, a, b))::etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that performs mod on two int const *)
 let rem (x: const) (y: const): const = 
@@ -159,11 +192,16 @@ let rem (x: const) (y: const): const =
   | Int a, Int b -> Int (a mod b)
 
 (* function that performs rem command on stack *)
-let rem_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> 
-    (if is_int h1 && is_int h2 && not (is_zero h2) then (rem h1 h2)::tl else push_stack (Error "<error>") stack)
-  | _ -> push_stack (Error "<error>") stack
+let rem_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl ->
+      (if is_int h1 && is_int h2 && not (is_zero h2) then
+        (Env ((rem h1 h2)::tl, a, b))::etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that negates a int const *)
 let neg (x: const): const = 
@@ -171,17 +209,24 @@ let neg (x: const): const =
   | Int a -> Int (-a)
 
 (* function that performs neg command on stack *)
-let neg_stack (stack: const list): const list = 
-  match stack with
-  | hd::tl -> 
-    (if is_int hd then (neg hd)::tl else push_stack (Error "<error>") stack)
-  | [] -> push_stack (Error "<error>") stack
+let neg_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | hd::tl -> 
+      (if is_int hd then
+        (Env ((neg hd)::tl, a, b)) :: etl
+      else 
+        (Env (push (Error "<error>") stack, a, b))::etl)
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 
 (* function that performs swap command on stack *)
-let swap_stack (stack: const list): const list = 
-  match stack with
-  | h1::h2::tl -> h2::h1::tl
-  | _ -> push_stack (Error "<error>") stack
+let swap_stack (envr_lst: env list): env list = 
+  match envr_lst with
+  | Env (stack, a, b)::etl -> 
+    (match stack with
+    | h1::h2::tl -> (Env (h2::h1::tl, a, b))::etl
+    | _ -> (Env (push (Error "<error>") stack, a, b))::etl)
 (*************************************************************************************************)
 
 
@@ -352,34 +397,45 @@ let com_p: com parser =
   Parser (fun s -> match parse (many_p_str letter_p) s with
             | (Some x, xs) -> (str_to_com x, xs))
 
-let interpret_com (s: string) (stack: const list): (const list * bool) = 
+let interpret_com (s: string) (envr_lst: env list): (env list * bool) = 
   match parse com_p s with
   | (Some Push, c) -> 
     (match parse const_p c with
-    | (Some x, _) -> (push_stack x stack, false)
-    | _ -> (stack, false))
-  | (Some Pop, _) -> (pop_stack stack, false)
-  | (Some Add, _) -> (add_stack stack, false)
-  | (Some Sub, _) -> (sub_stack stack, false)
-  | (Some Mul, _) -> (mul_stack stack, false)
-  | (Some Div, _) -> (div_stack stack, false)
-  | (Some Rem, _) -> (rem_stack stack, false)
-  | (Some Neg, _) -> (neg_stack stack, false)
-  | (Some Swap, _) -> (swap_stack stack, false)
-  | (Some Quit, _) -> (stack, true)
+    | (Some x, _) -> (push_stack x envr_lst, false)
+    | _ -> (envr_lst, false))
+  | (Some Pop, _) -> (pop_stack envr_lst, false)
+  | (Some Add, _) -> (add_stack envr_lst, false)
+  | (Some Sub, _) -> (sub_stack envr_lst, false)
+  | (Some Mul, _) -> (mul_stack envr_lst, false)
+  | (Some Div, _) -> (div_stack envr_lst, false)
+  | (Some Rem, _) -> (rem_stack envr_lst, false)
+  | (Some Neg, _) -> (neg_stack envr_lst, false)
+  | (Some Swap, _) -> (swap_stack envr_lst, false)
+  | (Some Quit, _) -> (envr_lst, true)
 
 
-let rec interpret_prog (lst: string list) (stack: const list) (outputFile: string): unit =  
+(* let rec interpret_prog (lst: string list) (stack: const list) (outputFile: string): unit =  
   match lst with 
   | [] -> write_to_file stack outputFile
   | hd::tl -> 
     let (stack, quit) = interpret_com hd stack in 
-    if quit then write_to_file stack outputFile else interpret_prog tl stack outputFile
+    if quit then write_to_file stack outputFile else interpret_prog tl stack outputFile *)
+
+let rec interpret_prog (lst: string list) (envr_lst: env list) (outputFile: string): unit = 
+  match lst with
+  | [] -> write_to_file envr_lst outputFile
+  | hd::tl -> 
+    let (env_lst, quit) = interpret_com hd envr_lst in 
+    if quit then write_to_file env_lst outputFile else interpret_prog tl env_lst outputFile
+
+(* let run_prog (inputFile: string) (outputFile: string): unit = 
+  let lst = read_input_file inputFile in  
+  interpret_prog lst [] outputFile *)
 
 let run_prog (inputFile: string) (outputFile: string): unit = 
-  let lst = read_input_file inputFile in  
-  interpret_prog lst [] outputFile
-
+  let lst = read_input_file inputFile in 
+  let init_env =  Env ([], Hashtbl.create 50, false) in 
+  interpret_prog lst (init_env::[]) outputFile
   
 
 
