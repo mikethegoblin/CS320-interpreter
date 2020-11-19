@@ -45,6 +45,7 @@ and command =
   | And | Or | Not | Eq
   | Lte | Lt | Gte | Gt 
   | Bnd
+  | BeginEnd of commands
   | Quit
 
 and commands = command list
@@ -78,6 +79,18 @@ let rec fprint_command oc com =
      | Div -> fprintf oc "Div\n"
      | Rem -> fprintf oc "Rem\n"
      | Neg -> fprintf oc "Neg\n"
+     | Cat -> fprintf oc "Cat\n"
+     | And -> fprintf oc "And\n"
+     | Or -> fprintf oc "Or\n"
+     | Not -> fprintf oc "Not\n"
+     | Eq -> fprintf oc "Eq\n"
+     | Lte -> fprintf oc "Lte\n"
+     | Lt -> fprintf oc "Lt\n"
+     | Gte -> fprintf oc "Gte\n"
+     | Gt -> fprintf oc "Gt\n"
+     | Bnd -> fprintf oc "Bnd\n"
+     | BeginEnd coms -> 
+      fprintf oc "Begin\n"; fprint_commands oc coms; fprintf oc "End\n"
      | Quit -> fprintf oc "Quit\n")
 
 and fprint_commands oc coms =
@@ -145,6 +158,7 @@ let rec many (p: 'a parser): 'a list parser =
   <|>
   return[]
 
+(* recursive parser that fails on empty *)
 let many1 (p: 'a parser): 'a list parser =
   let* a = p in
   let* ls = many p in
@@ -359,6 +373,19 @@ let bnd: command parser =
   let* _ = reserved "Bnd" in 
   return Bnd
 
+(* let rec begin_end (): command parser = 
+  let* _ = reserved "Begin" in 
+  let* coms = many1 (choice 
+    [ push; swap; pop;
+    add; sub; mul; div; rem; neg;
+    cat; _and; _or; _not; eq;
+    lte; lt; gte; gt;
+    bnd;
+    begin_end ();
+    quit; ]) in 
+  let* _ = reserved "End" in 
+  return (BeginEnd coms) *)
+  
 
 let rec command () =
   let* _ = delay() in
@@ -368,11 +395,18 @@ let rec command () =
       cat; _and; _or; _not; eq;
       lte; lt; gte; gt;
       bnd;
+      begin_end ();
       quit; ]
 
 and commands () =
   let* _ = delay() in
   many1 (command ())
+
+and begin_end () = 
+  let* _ = reserved "Begin" in 
+  let* coms = commands () in 
+  let* _ = reserved "End" in 
+  return (BeginEnd coms)
 
 
 (* evaluation *)
@@ -782,9 +816,29 @@ let bnd_stack (x: value) (y: value) (envs: env_lst) (stack: stack) =
     | None -> ((a, b)::cur_env, offset) :: rest, U :: stack
     )
   | _ -> envs, (E :: x :: y :: stack)
+
+(* process the end of BeginEnd block, delete current env
+and return last stack frame to original stack *)
+let end_env (stack: stack) (envs: env_lst) = 
+  let cur_len = List.length stack in 
+  let old_len = 
+    (match envs with
+    | (env, n)::tl -> n) in 
+  let top_frame = 
+    (match stack with
+    | tf::rest -> tf) in 
+  let rec flush_stack (stack: stack) (num: int): stack = 
+    match num with
+    | 0 -> stack
+    | n -> 
+      (match stack with
+      | [] -> []
+      | hd :: tl -> flush_stack tl (num - 1))
+  in
+  top_frame :: (flush_stack stack (cur_len - old_len))
   
 
-let rec interp coms stack (envs: env_lst) =
+let rec interp coms stack (envs: env_lst): stack =
   match coms, stack with
   | Push v :: coms, _ ->
     interp coms (v :: stack) envs
@@ -825,6 +879,11 @@ let rec interp coms stack (envs: env_lst) =
   | Bnd :: coms, x :: y :: stack' -> 
     let new_envs, new_stack = bnd_stack x y envs stack' in 
     interp coms new_stack new_envs
+  | BeginEnd coms :: coms', stack -> 
+    let envs' = ([], List.length stack) :: envs in 
+    let stack' = interp coms stack envs' in 
+    let new_stack = end_env stack' envs' in 
+    interp coms' new_stack envs
   | Quit :: coms, _ -> stack
   | [], _ -> stack
   | _ :: coms, _ ->
@@ -847,3 +906,10 @@ let interpreter (inputFile : string) (outputFile : string) =
   let stack = interp coms [] ((init_env, 0)::[]) in
   let _ = fprint_stack oc stack in
   close_out oc
+
+let debug (fname: string) = 
+  let strs = readlines fname in
+  let css = List.map explode strs in
+  let cs = List.fold_right (fun cs acc -> cs @ ['\n'] @ acc) css [] in
+  match (ws >> commands ()) cs with
+  | Some coms, [] -> print_commands coms
