@@ -46,6 +46,7 @@ and command =
   | Lte | Lt | Gte | Gt 
   | Bnd
   | BeginEnd of commands
+  | IfThenElse of (commands * commands * commands)
   | Quit
 
 and commands = command list
@@ -91,6 +92,9 @@ let rec fprint_command oc com =
      | Bnd -> fprintf oc "Bnd\n"
      | BeginEnd coms -> 
       fprintf oc "Begin\n"; fprint_commands oc coms; fprintf oc "End\n"
+     | IfThenElse (test, true_coms, false_coms) -> 
+      fprintf oc "If\n"; fprint_commands oc test; fprintf oc "Then\n"; fprint_commands oc true_coms;
+      fprintf oc "Else\n"; fprint_commands oc false_coms; fprintf oc "EndIf\n"
      | Quit -> fprintf oc "Quit\n")
 
 and fprint_commands oc coms =
@@ -373,20 +377,6 @@ let bnd: command parser =
   let* _ = reserved "Bnd" in 
   return Bnd
 
-(* let rec begin_end (): command parser = 
-  let* _ = reserved "Begin" in 
-  let* coms = many1 (choice 
-    [ push; swap; pop;
-    add; sub; mul; div; rem; neg;
-    cat; _and; _or; _not; eq;
-    lte; lt; gte; gt;
-    bnd;
-    begin_end ();
-    quit; ]) in 
-  let* _ = reserved "End" in 
-  return (BeginEnd coms) *)
-  
-
 let rec command () =
   let* _ = delay() in
   choice
@@ -396,6 +386,7 @@ let rec command () =
       lte; lt; gte; gt;
       bnd;
       begin_end ();
+      if_then_else ();
       quit; ]
 
 and commands () =
@@ -407,6 +398,16 @@ and begin_end () =
   let* coms = commands () in 
   let* _ = reserved "End" in 
   return (BeginEnd coms)
+
+and if_then_else () = 
+  let* _ = reserved "If" in 
+  let* test = commands () in 
+  let* _ = reserved "Then" in 
+  let* true_coms = commands () in 
+  let* _ = reserved "Else" in 
+  let* false_coms = commands () in 
+  let* _ = reserved "EndIf" in 
+  return (IfThenElse (test, true_coms, false_coms))
 
 
 (* evaluation *)
@@ -836,6 +837,18 @@ let end_env (stack: stack) (envs: env_lst) =
       | hd :: tl -> flush_stack tl (num - 1))
   in
   top_frame :: (flush_stack stack (cur_len - old_len))
+
+let eval_test (stack: stack) (envs: env_lst): bool option = 
+  match stack with
+  | (B true)::tl -> Some true
+  | (B false)::tl -> Some false
+  | (N a) :: tl -> 
+    (match search_envs a envs with
+    | Some (B true) -> Some true
+    | Some (B false) -> Some false
+    | _ -> None)
+  | _ -> None
+
   
 
 let rec interp coms stack (envs: env_lst): stack =
@@ -884,7 +897,26 @@ let rec interp coms stack (envs: env_lst): stack =
     let stack' = interp coms stack envs' in 
     let new_stack = end_env stack' envs' in 
     interp coms' new_stack envs
-  | Quit :: coms, _ -> stack
+  | IfThenElse (test, true_coms, false_coms) :: coms, stack ->
+    print_commands test; Printf.fprintf stdout "\n";
+    print_commands true_coms; Printf.fprintf stdout "\n";
+    print_commands false_coms; Printf.fprintf stdout "\n";
+    let envs' = ([], List.length stack)::envs in 
+    let stack1 = interp test stack envs' in Printf.fprintf stdout "If"; print_stack stack1; Printf.fprintf stdout "\n";
+    let stack2 = end_env stack1 envs' in print_stack stack2; Printf.fprintf stdout "\n";
+    (match eval_test stack2 envs with
+    | None -> interp coms (E::stack) envs
+    | Some true -> 
+      let envs' = ([], List.length stack) :: envs in 
+      let stack1 = interp true_coms stack envs' in Printf.fprintf stdout "Then:"; print_stack stack1; Printf.fprintf stdout "\n";
+      let stack2 = end_env stack1 envs' in 
+      interp coms stack2 envs;
+    | Some false -> 
+      let envs' = ([], List.length stack) :: envs in 
+      let stack1 = interp false_coms stack envs' in 
+      let stack2 = end_env stack1 envs' in 
+      interp coms stack2 envs)
+  | Quit :: coms, _ -> Printf.fprintf stdout "Quit:"; print_stack stack; Printf.fprintf stdout "\n"; stack
   | [], _ -> stack
   | _ :: coms, _ ->
     interp coms (E :: stack) envs
