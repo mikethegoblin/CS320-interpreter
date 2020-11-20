@@ -851,7 +851,7 @@ let eval_test (stack: stack) (envs: env_lst): bool option =
 
   
 
-let rec interp coms stack (envs: env_lst): stack =
+let rec interp coms stack (envs: env_lst): stack * bool =
   match coms, stack with
   | Push v :: coms, _ ->
     interp coms (v :: stack) envs
@@ -894,30 +894,31 @@ let rec interp coms stack (envs: env_lst): stack =
     interp coms new_stack new_envs
   | BeginEnd coms :: coms', stack -> 
     let envs' = ([], List.length stack) :: envs in 
-    let stack' = interp coms stack envs' in 
+    let stack', quit = interp coms stack envs' in 
+    if quit then (stack', true) else
     let new_stack = end_env stack' envs' in 
     interp coms' new_stack envs
   | IfThenElse (test, true_coms, false_coms) :: coms, stack ->
-    print_commands test; Printf.fprintf stdout "\n";
-    print_commands true_coms; Printf.fprintf stdout "\n";
-    print_commands false_coms; Printf.fprintf stdout "\n";
     let envs' = ([], List.length stack)::envs in 
-    let stack1 = interp test stack envs' in Printf.fprintf stdout "If"; print_stack stack1; Printf.fprintf stdout "\n";
-    let stack2 = end_env stack1 envs' in print_stack stack2; Printf.fprintf stdout "\n";
+    let stack1, quit = interp test stack envs' in 
+    if quit then (stack1, true) else
+    let stack2 = end_env stack1 envs' in 
     (match eval_test stack2 envs with
     | None -> interp coms (E::stack) envs
     | Some true -> 
       let envs' = ([], List.length stack) :: envs in 
-      let stack1 = interp true_coms stack envs' in Printf.fprintf stdout "Then:"; print_stack stack1; Printf.fprintf stdout "\n";
+      let stack1, quit = interp true_coms stack envs' in 
+      if quit then (stack1, true) else
       let stack2 = end_env stack1 envs' in 
       interp coms stack2 envs;
     | Some false -> 
       let envs' = ([], List.length stack) :: envs in 
-      let stack1 = interp false_coms stack envs' in 
+      let stack1, quit = interp false_coms stack envs' in 
+      if quit then (stack1, true) else 
       let stack2 = end_env stack1 envs' in 
       interp coms stack2 envs)
-  | Quit :: coms, _ -> Printf.fprintf stdout "Quit:"; print_stack stack; Printf.fprintf stdout "\n"; stack
-  | [], _ -> stack
+  | Quit :: coms, _ -> stack, true
+  | [], _ -> stack, false
   | _ :: coms, _ ->
     interp coms (E :: stack) envs
 
@@ -935,7 +936,7 @@ let interpreter (inputFile : string) (outputFile : string) =
   let coms = parse inputFile in
   let oc = open_out outputFile in
   let init_env = [] in 
-  let stack = interp coms [] ((init_env, 0)::[]) in
+  let stack, _ = interp coms [] ((init_env, 0)::[]) in
   let _ = fprint_stack oc stack in
   close_out oc
 
