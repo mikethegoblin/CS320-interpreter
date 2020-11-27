@@ -55,7 +55,7 @@ and stack = value list
 
 and env = (string * value) list
 
-and env_lst = (env * int) list
+and env_lst = env list
 
 let fprint_value oc cst =
   Printf.
@@ -441,7 +441,7 @@ let rec search_env (x: string) (env: env): value option =
 (* search for key x in all environments, search from cur env to outer env*)
 let rec search_envs (x: string) (envs: env_lst): value option = 
   match envs with
-  | (e, i)::envs' -> 
+  | e::envs' -> 
     (match search_env x e with
     | Some v -> Some v
     | None -> search_envs x envs')
@@ -801,7 +801,7 @@ let bnd_stack (x: value) (y: value) (envs: env_lst) (stack: stack) =
     (match envs with
     | hd::tl -> hd, tl)
   in
-  let (cur_env, offset) = env_tp in 
+  let cur_env = env_tp in 
   match x, y with
   | _, E -> envs, (E :: x :: y :: stack)
   | N a, (N b as nb) ->
@@ -809,18 +809,18 @@ let bnd_stack (x: value) (y: value) (envs: env_lst) (stack: stack) =
     | None -> envs, (E :: x :: y :: stack)
     | Some v -> 
       match search_env a cur_env with
-      | Some v -> (((update_bnd a nb cur_env), offset) :: rest), U :: stack
-      | None -> ((a, nb)::cur_env, offset) :: rest, U :: stack)
+      | Some v -> ((update_bnd a nb cur_env) :: rest), U :: stack
+      | None -> ((a, nb)::cur_env) :: rest, U :: stack)
   | N a, b -> 
     (match search_env a cur_env with
-    | Some v -> (((update_bnd a b cur_env), offset) :: rest), U :: stack
-    | None -> ((a, b)::cur_env, offset) :: rest, U :: stack
+    | Some v -> (((update_bnd a b cur_env)) :: rest), U :: stack
+    | None -> ((a, b)::cur_env) :: rest, U :: stack
     )
   | _ -> envs, (E :: x :: y :: stack)
 
 (* process the end of BeginEnd block, delete current env
 and return last stack frame to original stack *)
-let end_env (stack: stack) (envs: env_lst) = 
+(* let end_env (stack: stack) (envs: env_lst) = 
   let cur_len = List.length stack in 
   let old_len = 
     (match envs with
@@ -836,13 +836,24 @@ let end_env (stack: stack) (envs: env_lst) =
       | [] -> []
       | hd :: tl -> flush_stack tl (num - 1))
   in
-  top_frame :: (flush_stack stack (cur_len - old_len))
+  top_frame :: (flush_stack stack (cur_len - old_len)) *)
 
-let eval_test (stack: stack) (envs: env_lst): bool option = 
+(* let eval_test (stack: stack) (envs: env_lst): bool option = 
   match stack with
   | (B true)::tl -> Some true
   | (B false)::tl -> Some false
   | (N a) :: tl -> 
+    (match search_envs a envs with
+    | Some (B true) -> Some true
+    | Some (B false) -> Some false
+    | _ -> None)
+  | _ -> None *)
+
+let eval_test (x: value) (envs: env_lst): bool option = 
+  match x with
+  | B true -> Some true
+  | B false -> Some false
+  | N a ->
     (match search_envs a envs with
     | Some (B true) -> Some true
     | Some (B false) -> Some false
@@ -893,30 +904,41 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     let new_envs, new_stack = bnd_stack x y envs stack' in 
     interp coms new_stack new_envs
   | BeginEnd coms :: coms', stack -> 
-    let envs' = ([], List.length stack) :: envs in 
+    let envs' = [] :: envs in 
     let stack', quit = interp coms stack envs' in 
     if quit then (stack', true) else
-    let new_stack = end_env stack' envs' in 
-    interp coms' new_stack envs
+    let top_frame = 
+      (match stack' with
+      | hd::tl -> hd
+    ) in 
+    interp coms' (top_frame::stack) envs
   | IfThenElse (test, true_coms, false_coms) :: coms, stack ->
-    let envs' = ([], List.length stack)::envs in 
+    let envs' = []::envs in 
     let stack1, quit = interp test stack envs' in 
     if quit then (stack1, true) else
-    let stack2 = end_env stack1 envs' in 
-    (match eval_test stack2 envs with
+    let top_frame = 
+    (match stack1 with 
+    | hd::tl -> hd) in 
+    (match eval_test top_frame envs with
     | None -> interp coms (E::stack) envs
     | Some true -> 
-      let envs' = ([], List.length stack) :: envs in 
+      let envs' = [] :: envs in 
       let stack1, quit = interp true_coms stack envs' in 
       if quit then (stack1, true) else
-      let stack2 = end_env stack1 envs' in 
-      interp coms stack2 envs;
+      let top_frame = 
+        (match stack1 with
+        | hd::tl -> hd
+      ) in  
+      interp coms (top_frame::stack) envs;
     | Some false -> 
-      let envs' = ([], List.length stack) :: envs in 
+      let envs' = [] :: envs in 
       let stack1, quit = interp false_coms stack envs' in 
       if quit then (stack1, true) else 
-      let stack2 = end_env stack1 envs' in 
-      interp coms stack2 envs)
+      let top_frame = 
+        (match stack1 with
+        | hd::tl -> hd
+      ) in  
+      interp coms (top_frame::stack) envs)
   | Quit :: coms, _ -> stack, true
   | [], _ -> stack, false
   | _ :: coms, _ ->
@@ -936,7 +958,7 @@ let interpreter (inputFile : string) (outputFile : string) =
   let coms = parse inputFile in
   let oc = open_out outputFile in
   let init_env = [] in 
-  let stack, _ = interp coms [] ((init_env, 0)::[]) in
+  let stack, _ = interp coms [] (init_env::[]) in
   let _ = fprint_stack oc stack in
   close_out oc
 
