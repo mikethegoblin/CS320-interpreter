@@ -37,6 +37,9 @@ type value =
   | N of name
   | U
   | E
+  | C of closure 
+
+and closure = (name * commands * env_lst)
 
 and command =
   | Push of value | Swap | Pop
@@ -47,6 +50,9 @@ and command =
   | Bnd
   | BeginEnd of commands
   | IfThenElse of (commands * commands * commands)
+  | Fun of (name * name * commands)
+  | Call
+  | Return
   | Quit
 
 and commands = command list
@@ -65,37 +71,43 @@ let fprint_value oc cst =
      | S s -> fprintf oc "%s" s
      | N n -> fprintf oc "%s" n
      | U -> fprintf oc "<unit>"
-     | E -> fprintf oc "<error>")
+     | E -> fprintf oc "<error>"
+     | C c -> fprintf oc "<CLOSURE>")
 
 let rec fprint_command oc com =
   Printf.
     (match com with
-     | Push cst ->
-       fprintf oc "Push %a\n" fprint_value cst;
-     | Swap -> fprintf oc "Swap\n"
-     | Pop -> fprintf oc "Pop\n"
-     | Add -> fprintf oc "Add\n"
-     | Sub -> fprintf oc "Sub\n"
-     | Mul -> fprintf oc "Mul\n"
-     | Div -> fprintf oc "Div\n"
-     | Rem -> fprintf oc "Rem\n"
-     | Neg -> fprintf oc "Neg\n"
-     | Cat -> fprintf oc "Cat\n"
-     | And -> fprintf oc "And\n"
-     | Or -> fprintf oc "Or\n"
-     | Not -> fprintf oc "Not\n"
-     | Eq -> fprintf oc "Eq\n"
-     | Lte -> fprintf oc "Lte\n"
-     | Lt -> fprintf oc "Lt\n"
-     | Gte -> fprintf oc "Gte\n"
-     | Gt -> fprintf oc "Gt\n"
-     | Bnd -> fprintf oc "Bnd\n"
-     | BeginEnd coms -> 
-      fprintf oc "Begin\n"; fprint_commands oc coms; fprintf oc "End\n"
-     | IfThenElse (test, true_coms, false_coms) -> 
-      fprintf oc "If\n"; fprint_commands oc test; fprintf oc "Then\n"; fprint_commands oc true_coms;
-      fprintf oc "Else\n"; fprint_commands oc false_coms; fprintf oc "EndIf\n"
-     | Quit -> fprintf oc "Quit\n")
+    | Push cst ->
+      fprintf oc "Push %a\n" fprint_value cst;
+    | Swap -> fprintf oc "Swap\n"
+    | Pop -> fprintf oc "Pop\n"
+    | Add -> fprintf oc "Add\n"
+    | Sub -> fprintf oc "Sub\n"
+    | Mul -> fprintf oc "Mul\n"
+    | Div -> fprintf oc "Div\n"
+    | Rem -> fprintf oc "Rem\n"
+    | Neg -> fprintf oc "Neg\n"
+    | Cat -> fprintf oc "Cat\n"
+    | And -> fprintf oc "And\n"
+    | Or -> fprintf oc "Or\n"
+    | Not -> fprintf oc "Not\n"
+    | Eq -> fprintf oc "Eq\n"
+    | Lte -> fprintf oc "Lte\n"
+    | Lt -> fprintf oc "Lt\n"
+    | Gte -> fprintf oc "Gte\n"
+    | Gt -> fprintf oc "Gt\n"
+    | Bnd -> fprintf oc "Bnd\n"
+    | BeginEnd coms -> 
+    fprintf oc "Begin\n"; fprint_commands oc coms; fprintf oc "End\n"
+    | IfThenElse (test, true_coms, false_coms) -> 
+    fprintf oc "If\n"; fprint_commands oc test; fprintf oc "Then\n"; fprint_commands oc true_coms;
+    fprintf oc "Else\n"; fprint_commands oc false_coms; fprintf oc "EndIf\n"
+    | Fun (fname, arg, coms) -> 
+    fprintf oc "Fun "; fprintf oc "%s " fname; fprintf oc "%s\n" arg;
+    fprint_commands oc coms; fprintf oc "EndFun\n"
+    | Call -> fprintf oc "Call\n"
+    | Return -> fprintf oc "Return\n"
+    | Quit -> fprintf oc "Quit\n")
 
 and fprint_commands oc coms =
   List.iter (fprint_command oc) coms
@@ -377,6 +389,14 @@ let bnd: command parser =
   let* _ = reserved "Bnd" in 
   return Bnd
 
+let call: command parser = 
+  let* _ = reserved "Call" in 
+  return Call
+
+let rtn: command parser = 
+  let* _ = reserved "Return" in 
+  return Return
+
 let rec command () =
   let* _ = delay() in
   choice
@@ -387,6 +407,9 @@ let rec command () =
       bnd;
       begin_end ();
       if_then_else ();
+      _fun ();
+      call;
+      rtn;
       quit; ]
 
 and commands () =
@@ -408,6 +431,14 @@ and if_then_else () =
   let* false_coms = commands () in 
   let* _ = reserved "EndIf" in 
   return (IfThenElse (test, true_coms, false_coms))
+
+and _fun () = 
+  let* _ = reserved "Fun" in 
+  let* fname = name << ws in 
+  let* arg = name << ws in 
+  let* coms = commands () in 
+  let* _ = reserved "EndFun" in 
+  return (Fun (fname, arg, coms))
 
 
 (* evaluation *)
@@ -860,6 +891,16 @@ let eval_test (x: value) (envs: env_lst): bool option =
     | _ -> None)
   | _ -> None
 
+let bind_closure (fname: name) (arg: name) (coms: commands) (envs: env_lst): env_lst = 
+  let closure = (arg, coms, envs) in 
+  match envs with
+  | e::tl -> ((fname, C closure)::e)::tl
+
+let resolve_name (x: name) (envs: env_lst) = 
+  match search_envs x envs with
+  | Some v -> v
+  
+
   
 
 let rec interp coms stack (envs: env_lst): stack * bool =
@@ -939,6 +980,68 @@ let rec interp coms stack (envs: env_lst): stack * bool =
         | hd::tl -> hd
       ) in  
       interp coms (top_frame::stack) envs)
+  | Fun (fname, arg, coms) :: coms', stack -> 
+    let envs' = bind_closure fname arg coms envs in 
+    interp coms' (U::stack) envs'
+  | Call :: coms, x :: y :: stack' ->
+    (match x, y with
+    | E, _ -> interp coms (E :: x :: y :: stack') envs
+    | x, C (arg, coms', envs') -> 
+      (match x with
+      | N a -> 
+        (match search_envs a envs with
+        | Some v -> 
+          (match envs' with
+          | e::tl -> 
+            let new_envs = ((arg, v) :: e) :: tl in 
+            let stack1, quit = interp coms' stack' new_envs in 
+            if quit then (stack1, true) else 
+            let top_frame = 
+              (match stack1 with
+              | hd::tl -> hd) in 
+            interp coms (top_frame::stack') envs)
+        | _ -> interp coms (E :: x :: y :: stack') envs)
+      | v -> 
+        (match envs' with
+          | e::tl -> 
+            let new_envs = ((arg, v) :: e) :: tl in 
+            let stack1, quit = interp coms' stack' new_envs in 
+            if quit then (stack1, true) else 
+            let top_frame = 
+              (match stack1 with
+              | hd::tl -> hd) in 
+            interp coms (top_frame::stack') envs))
+    | N a, N fname ->
+      (match search_envs a envs, search_envs fname envs with
+      | Some v, Some (C (arg, coms', envs') as clos) ->
+        (match envs' with
+        | e::tl -> 
+          let new_envs = ((arg, v) :: (fname, clos) :: e)::tl in 
+          let stack1, quit = interp coms' stack' new_envs in 
+          if quit then (stack1, true) else
+          let top_frame = 
+            (match stack1 with
+            | hd::tl -> hd) in 
+          interp coms (top_frame::stack') envs)
+      | _ -> interp coms (E :: x :: y :: stack') envs)
+    | v, N fname -> 
+      (match search_envs fname envs with
+      | Some (C (arg, coms', envs') as clos) -> 
+        (match envs' with
+        | e::tl -> 
+          let new_envs = ((arg, v) :: (fname, clos) :: e) :: tl in 
+          let stack1, quit = interp coms' stack' new_envs in 
+          if quit then (stack1, true) else 
+          let top_frame = 
+            (match stack1 with 
+            | hd::tl -> hd) in 
+          interp coms (top_frame::stack') envs)
+      | _ -> interp coms (E :: x :: y :: stack') envs)
+    | _ -> interp coms (E :: x :: y :: stack') envs)
+  | Return :: coms, x :: stack -> 
+    (match x with
+    | N a -> [resolve_name a envs], false
+    | _ -> [x], false)
   | Quit :: coms, _ -> stack, true
   | [], _ -> stack, false
   | _ :: coms, _ ->
