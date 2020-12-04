@@ -1,0 +1,15 @@
+Push 23
+Lt
+Pop
+Pop
+Lt
+Push 32
+Push 91
+Lt
+Push 48
+Push 25
+Lt
+Push <true>
+Push 11
+Lt
+Quit

@@ -5,7 +5,7 @@ Fun kfact n
             Push n
             Lte
         Then
-            Push k
+            Push k 
             Push 1
             Call
         Else
@@ -48,5 +48,3 @@ Pop
 Push fact
 Push 10
 Call
-
-

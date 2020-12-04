@@ -1,0 +1,23 @@
+Fun test x
+Push x
+Push 11
+Add
+Return
+EndFun
+Push 12
+Push a
+Bnd
+Fun test1 x
+Push x
+Push a
+Call
+Push x
+Push a
+Call
+Add
+Return
+EndFun
+Push test1
+Push test
+Call
+Quit

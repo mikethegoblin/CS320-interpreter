@@ -1,0 +1,75 @@
+Fun kmccarthy n
+    Fun kmccarthy_aux k
+        If 
+           Push 100
+           Push n
+           Gt
+        Then
+            Push k
+            Push 10
+            Push n
+            Sub
+            Call
+        Else
+            Fun continuation1 res
+                Fun continuation2 res
+                    Push k 
+                    Push res
+                    Call
+                EndFun
+                Push kmccarthy
+                Push res
+                Call
+                Push continuation2
+                Call
+            EndFun
+            Push kmccarthy
+            Push 11
+            Push n
+            Add
+            Call
+            Push continuation1
+            Call
+        EndIf
+    EndFun
+    Push kmccarthy_aux
+    Return
+EndFun
+Pop
+
+Fun mccarthy n
+    Fun id x
+        Push x
+        Return
+    EndFun
+    Push kmccarthy
+    Push n
+    Call
+    Push id
+    Call
+EndFun
+Pop
+
+Fun loop n
+    If
+        Push 110
+        Push n
+        Lt
+    Then
+        Push mccarthy
+        Push n
+        Call
+        Push loop
+        Push 1
+        Push n
+        Add
+        Call
+    Else
+        Quit 
+    EndIf
+EndFun
+Pop
+
+Push loop
+Push 0
+Call

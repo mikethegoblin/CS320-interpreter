@@ -1,0 +1,33 @@
+Fun fibo n
+    If
+        Push n
+        Push 1
+        Eq
+    Then
+        Push 1
+    Else
+        If
+            Push n
+            Push 2
+            Eq
+        Then
+            Push 1
+        Else
+            Push fibo
+            Push 1
+            Push n
+            Sub
+            Call
+            Push fibo
+            Push 2
+            Push n
+            Sub
+            Call
+            Add
+        EndIf
+    EndIf
+EndFun
+Pop
+Push fibo
+Push 10
+Call

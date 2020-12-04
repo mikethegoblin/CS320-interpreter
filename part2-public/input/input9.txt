@@ -1,0 +1,47 @@
+Push <true>
+Push xyz
+Push <unit>
+Push 100
+Pop
+Push 235
+Pop
+Begin
+Push x
+Push 564
+Push b
+Bnd
+Begin
+Push 6
+Push c
+Bnd
+Push d
+Begin
+Push c
+Push b
+Sub
+End
+Swap
+Bnd
+Push <true>
+Push abc
+Bnd
+Push d
+Push c
+Mul
+End
+Push twentytwenty
+Bnd
+Push abc
+Push 60
+Add
+Push twentytwenty
+Push 1
+Mul
+End
+Push 25
+Eq
+Push abc
+Push 73
+Add
+Swap
+Quit

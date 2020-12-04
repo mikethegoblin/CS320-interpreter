@@ -1,0 +1,33 @@
+Push <unit>
+Push empty
+Bnd
+Fun test x
+Push "xxx"
+Return
+EndFun
+Push 523
+Push y
+Bnd
+Begin
+Push 123
+Push y
+Bnd
+Fun test x
+Begin
+Push x
+Push y
+Add
+End
+Return
+EndFun
+Push test
+Push 123
+Call
+End
+Push test
+Push y
+Call
+Push empty
+Swap
+Call
+Quit

@@ -1,0 +1,12 @@
+Fun test x
+Begin
+Push x
+Push x
+Add
+End
+Return
+EndFun
+Push test
+Push 123
+Call
+Quit

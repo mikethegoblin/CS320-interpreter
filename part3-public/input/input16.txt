@@ -1,0 +1,16 @@
+Fun curried_add x
+Fun test y 
+Push x
+Push y
+Add
+Return
+EndFun
+Push test
+Return
+EndFun
+Push curried_add
+Push 100
+Call
+Push 300
+Call
+Quit

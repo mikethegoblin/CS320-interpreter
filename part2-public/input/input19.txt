@@ -1,0 +1,31 @@
+If
+If
+Push 56
+Push 41
+Eq
+Then
+Push 49
+Else
+Push <true>
+EndIf
+Then
+Push "Expression is: "
+If
+Push <true>
+Push 10
+Swap
+Swap
+Swap
+Then
+Push "true"     
+Else
+Push "false"     
+EndIf
+Swap
+Quit
+Cat
+Else
+Push <false>
+Push 87
+EndIf
+Quit

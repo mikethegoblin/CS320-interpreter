@@ -1,0 +1,13 @@
+Eq
+Push 37
+Eq
+Pop
+Push 37
+Eq
+Push 66
+Push 16
+Eq
+Push 70
+Push "70"
+Eq
+Quit

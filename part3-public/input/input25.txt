@@ -1,0 +1,44 @@
+Push "find the hidden number"
+Push 534
+Push hid
+Bnd
+Pop
+Fun find x
+If
+Push x
+Push hid
+Eq
+Then
+Push <true>
+Else
+Push <false>
+EndIf
+EndFun
+Try
+If
+Push find
+Push 534
+Call
+Then
+Push "find"
+Else
+Push <error>
+EndIf
+With
+Push "could not find"
+EndTry
+Try
+If
+Push find
+Push 533
+Call
+Then
+Push "find"
+Else
+Push 0
+Push 0
+Div
+EndIf
+With
+Push "could not find"
+EndTry

@@ -1,0 +1,16 @@
+Push "Cheese is dumb"
+Eq
+Push <unit>
+Push 290
+Eq
+Push 49
+Push 20
+Eq
+Pop
+Push 40
+Push 40
+Eq
+Push -29
+Push -23
+Eq
+Quit

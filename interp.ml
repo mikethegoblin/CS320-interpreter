@@ -850,13 +850,13 @@ let bnd_stack (x: value) (y: value) (envs: env_lst) (stack: stack) =
   let cur_env = env_tp in 
   match x, y with
   | _, E -> envs, (E :: x :: y :: stack)
-  | N a, (N b as nb) ->
+  | N a, N b ->
     (match search_envs b envs with
     | None -> envs, (E :: x :: y :: stack)
     | Some v -> 
       match search_env a cur_env with
-      | Some v -> ((update_bnd a nb cur_env) :: rest), U :: stack
-      | None -> ((a, nb)::cur_env) :: rest, U :: stack)
+      | Some v -> ((update_bnd a v cur_env) :: rest), U :: stack
+      | None -> ((a, v)::cur_env) :: rest, U :: stack)
   | N a, b -> 
     (match search_env a cur_env with
     | Some v -> (((update_bnd a b cur_env)) :: rest), U :: stack
@@ -1130,10 +1130,6 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     interp coms' (U::stack) envs'
   | Call :: coms, x :: y :: stack' ->
     (match x, y with
-    | E, _ -> 
-      (match !tw_stack with
-      | hd :: tl -> tw_stack := true :: tl; (stack, false)
-      | [] -> interp coms (E :: x :: y :: stack') envs)
     | x, C (arg, coms', envs') -> 
       (match x with
       | N a -> 
@@ -1167,7 +1163,10 @@ let rec interp coms stack (envs: env_lst): stack * bool =
       | Some v, Some (C (arg, coms', envs') as clos) ->
         (match envs' with
         | e::tl -> 
-          let new_envs = ((arg, v) :: (fname, clos) :: e)::tl in 
+          let new_envs = 
+            (match search_envs fname envs' with
+            | Some f -> ((arg, v) :: e) :: tl
+            | None -> ((arg, v) :: (fname, clos) :: e) :: tl) in 
           let stack1, quit = interp coms' stack' new_envs in 
           if quit then (stack1, true) else
           let top_frame = 
@@ -1183,7 +1182,10 @@ let rec interp coms stack (envs: env_lst): stack * bool =
       | Some (C (arg, coms', envs') as clos) -> 
         (match envs' with
         | e::tl -> 
-          let new_envs = ((arg, v) :: (fname, clos) :: e) :: tl in 
+          let new_envs = 
+            (match search_envs fname envs' with
+            | Some f -> ((arg, v) :: e) :: tl
+            | None -> ((arg, v) :: (fname, clos) :: e) :: tl) in 
           let stack1, quit = interp coms' stack' new_envs in 
           if quit then (stack1, true) else 
           let top_frame = 

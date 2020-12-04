@@ -1,0 +1,14 @@
+Try
+Push 1
+Push "1"
+Add
+With
+Push "not here"
+Try
+Push 1
+Push "1"
+Add
+With
+Push "neither here"
+EndTry
+EndTry

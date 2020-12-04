@@ -1,0 +1,15 @@
+Push 12
+Push _x_
+Bnd
+Pop
+Push 2
+Push _x_
+Add
+Push <true>
+Push b
+Bnd 
+Pop
+Push <true>
+Push B
+Eq
+Quit

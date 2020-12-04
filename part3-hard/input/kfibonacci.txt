@@ -1,0 +1,68 @@
+Fun kfibo n
+    Fun kfibo_aux k
+        If
+            Push 0
+            Push n
+            Lte
+        Then
+            Push k
+            Push 0
+            Call
+        Else
+            If
+                Push 1
+                Push n
+                Eq
+            Then
+                Push k
+                Push 1
+                Call
+            Else
+                Fun continuation1 res1
+                    Fun continuation2 res2
+                        Push k 
+                        Push res1
+                        Push res2
+                        Add
+                        Call
+                    EndFun
+
+                    Push kfibo
+                    Push 2
+                    Push n
+                    Sub
+                    Call
+                    Push continuation2
+                    Call
+                EndFun
+                Push kfibo
+                Push 1
+                Push n
+                Sub
+                Call
+                Push continuation1
+                Call
+            EndIf
+        EndIf
+    EndFun
+    Push kfibo_aux
+    Return
+EndFun
+Pop
+
+Fun fibo n
+    Fun id x
+        Push x
+        Return
+    EndFun
+    Push kfibo 
+    Push n
+    Call
+    Push id
+    Call
+EndFun
+Pop
+
+Push fibo
+Push 10
+Call

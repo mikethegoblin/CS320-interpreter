@@ -1,0 +1,34 @@
+Push 85
+Push x
+Bnd
+Push 63
+Push y
+Bnd
+Push x
+Push y
+Add
+Push "this is a string. "
+Push string1
+Bnd
+Push "WOW!!!"
+Push string2
+Bnd
+Push string2
+Push string1
+Cat
+Push <false>
+Push bool1
+Bnd
+Push <false>
+Push bool2
+Bnd
+Push bool1
+Push bool2
+And
+Push 15
+Push x
+Bnd
+Push x
+Push y
+Add
+Quit

@@ -1,0 +1,29 @@
+Push "let x = (List.map (fun y -> ( + ) y y) [0; 1; 2; 3; 4; 5])"
+Push ocaml_map
+Bnd
+Fun id x
+Push x
+Return
+EndFun
+Push id
+Push ocaml_map
+Call
+Push ocaml_map
+Push ocaml_map
+Push c
+Bnd
+Swap
+Bnd
+Push id
+Push ocaml_map
+Call
+Push id
+Push c
+Call
+Push id
+Push <error>
+Call
+Push id
+Push <unit>
+Call
+Quit

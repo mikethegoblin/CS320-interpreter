@@ -1,0 +1,8 @@
+Try
+Push 1
+Push 2
+Add
+Push "successful"
+With
+Push "error caught"
+EndTry

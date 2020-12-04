@@ -1,0 +1,11 @@
+Or
+Push 23
+Or
+Push <false>
+Or
+Pop
+Push <false>
+Or
+Push <true>
+Push <false>
+Or

@@ -1,0 +1,14 @@
+Try
+Try
+Push 0
+Push 1
+Div
+With
+Push 0
+Push 2
+Div
+EndTry
+Push "successful"
+With
+Push "error caught"
+EndTry

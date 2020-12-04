@@ -1,0 +1,9 @@
+Or
+Push <false>
+Or
+Push <true>
+Push <true>
+Or
+Push "test13"
+Or
+Quit

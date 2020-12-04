@@ -1,0 +1,26 @@
+Push 123
+If
+Push 6
+Push <true>
+Then
+Push "Zoom University"
+Else
+Push <false>
+EndIf
+Push _Name_
+Bnd
+Pop
+If
+Push 1
+Push 2
+Eq
+Then
+Push "No animal crossing"
+Else
+Push _Name_
+Push "Welcome to more of this "
+Cat
+EndIf
+Swap
+Pop
+Quit

@@ -1,0 +1,19 @@
+Push 13
+Push x
+Bnd
+Fun test arg
+Push x
+Push arg
+Add
+Return
+EndFun
+Push 15
+Push x
+Bnd
+Push 24
+Push b
+Bnd
+Push test
+Push b
+Call
+Quit

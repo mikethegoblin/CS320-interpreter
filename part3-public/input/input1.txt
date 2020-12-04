@@ -1,0 +1,25 @@
+Fun test1 b
+Push b
+Push b
+Mul
+Return
+EndFun
+Fun test2 a
+Push 200
+Push c
+Bnd
+Push 100
+Push a
+Mul
+Push c
+Mul
+Return
+EndFun
+Push test1
+Push 3
+Call
+Push test2
+Push 1
+Call
+Sub
+Quit

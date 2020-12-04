@@ -1,0 +1,21 @@
+Fun fact n
+    If
+        Push n
+        Push 0
+        Lt
+    Then
+        Push fact
+        Push 1
+        Push n
+        Sub
+        Call
+        Push n
+        Mul
+    Else
+        Push 1
+    EndIf
+EndFun
+Pop
+Push fact
+Push 5
+Call

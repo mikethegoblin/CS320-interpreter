@@ -1,0 +1,21 @@
+Fun sumTo100 x
+If
+Push 100
+Push x
+Lt
+Then
+Push sumTo100
+Push x
+Push 10
+Add
+Call
+Else
+Push x
+Push 1
+Add
+EndIf
+EndFun
+Push "start test"
+Push sumTo100
+Push 2
+Call

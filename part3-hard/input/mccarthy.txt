@@ -1,0 +1,24 @@
+Fun mccarthy n
+    If
+        Push 100
+        Push n
+        Gt
+    Then
+        Push 10
+        Push n
+        Sub
+    Else
+        Push mccarthy
+        Push mccarthy
+        Push n
+        Push 11
+        Add
+        Call
+        Call
+    EndIf
+EndFun
+Pop
+
+Push mccarthy
+Push 73
+Call

@@ -1,0 +1,15 @@
+Fun test1 x
+Push "test1: 1"
+Return
+EndFun
+Push test1
+Push 18
+Call
+Fun test1 x
+Push "test1: 2"
+Return
+EndFun
+Push test1
+Push <unit>
+Call
+Quit

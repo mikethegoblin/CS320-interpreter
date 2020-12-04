@@ -1,0 +1,43 @@
+Push 1
+Push "no face"
+Push 40
+Push 560
+Push quarantine
+Begin
+Begin
+Begin
+Push quarantine
+Push 12
+Push 5
+Mul
+Swap
+Bnd
+Push quarantine
+Push -0
+Add
+End
+End
+End
+Add
+Pop
+Swap
+Bnd
+Push 50
+Push b
+Bnd
+Pop
+Begin
+Push two
+Push b
+Lt
+Push quarantine
+Push "go to lectures kids"
+End
+Push quarantine
+Push 0
+Add
+Push 40
+Push 3
+Add
+Cat
+Quit

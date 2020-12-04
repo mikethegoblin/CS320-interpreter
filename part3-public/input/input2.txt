@@ -1,0 +1,12 @@
+Fun test1 x
+Push "test 1"
+Return
+EndFun
+Fun test2 x
+Push "test2"
+EndFun
+Pop
+Push test1
+Swap
+Call
+Quit

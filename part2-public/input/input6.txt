@@ -1,0 +1,16 @@
+Lt
+Push "I like this song"
+Push 12
+Lt
+Pop
+Swap
+Push <true>
+And
+Pop
+Push 102 
+Push 91
+Lt
+Push 12
+Push 103
+Lt
+Quit

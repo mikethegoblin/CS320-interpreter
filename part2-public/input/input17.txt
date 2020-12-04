@@ -1,0 +1,23 @@
+Bnd
+Push 58
+Push int
+Bnd
+Push "string"
+Push string
+Bnd
+Push <false>
+Push bool
+Bnd
+Push <unit>
+Push unit
+Bnd
+Push int
+Push new
+Bnd
+Push 64
+Push new
+Bnd
+Push test17
+Push new_name
+Bnd
+Quit

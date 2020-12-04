@@ -1,0 +1,9 @@
+Push Myname
+Push 20
+Swap
+Push "Bye"
+Cat
+Swap
+Push "Hi"
+Cat
+Quit

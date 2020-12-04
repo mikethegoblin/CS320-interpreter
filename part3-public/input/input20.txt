@@ -1,0 +1,28 @@
+Fun rete x
+Push <error>
+Return
+EndFun
+Pop
+Begin
+Push <unit>
+Push <true>
+Push <unit>
+Push <false>
+Push rete
+Push 7
+Call
+Pop
+Pop
+Pop
+End
+Begin
+Push <error>
+Push <true>
+Push rete
+Push <error>
+Call
+Pop
+Pop
+Pop
+End
+Quit
