@@ -926,7 +926,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Swap :: coms, x :: y :: stack ->
@@ -939,7 +939,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Sub :: coms, x :: y :: stack' ->
@@ -948,7 +948,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Mul :: coms, x :: y :: stack' ->
@@ -957,7 +957,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Div :: coms, x :: y :: stack' ->
@@ -966,7 +966,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Rem :: coms, x :: y :: stack' ->
@@ -975,7 +975,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Neg :: coms, x :: stack' ->
@@ -984,7 +984,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Cat :: coms, x :: y :: stack' -> 
@@ -993,7 +993,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | And :: coms, x :: y :: stack' -> 
@@ -1002,7 +1002,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Or :: coms, x :: y :: stack' -> 
@@ -1011,7 +1011,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Not :: coms, x :: stack' -> 
@@ -1020,7 +1020,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Eq :: coms, x :: y :: stack' -> 
@@ -1029,7 +1029,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Lte :: coms, x :: y :: stack' -> 
@@ -1038,7 +1038,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Lt :: coms, x :: y :: stack' -> 
@@ -1047,7 +1047,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Gte :: coms, x :: y :: stack' -> 
@@ -1056,7 +1056,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Gt :: coms, x :: y :: stack' ->
@@ -1065,7 +1065,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack envs)
     | [] -> interp coms new_stack envs)
   | Bnd :: coms, x :: y :: stack' -> 
@@ -1074,7 +1074,7 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     | hd :: tl -> 
       (match new_stack with
       | E :: s -> 
-        tw_stack := true :: tl; (stack, false)
+        tw_stack := true :: tl; (new_stack, false)
       | _ -> interp coms new_stack new_envs)
     | [] -> interp coms new_stack new_envs)
   | BeginEnd coms :: coms', stack -> 
@@ -1143,7 +1143,9 @@ let rec interp coms stack (envs: env_lst): stack * bool =
             let top_frame = 
               (match stack1 with
               | hd::tl -> hd) in 
-            interp coms (top_frame::stack') envs)
+            (match !tw_stack with
+            | true :: tl -> (stack1, false)
+            | _ -> interp coms (top_frame::stack') envs))
         | _ -> 
           (match !tw_stack with
           | hd :: tl -> tw_stack := true :: tl; (stack, false)
@@ -1157,7 +1159,9 @@ let rec interp coms stack (envs: env_lst): stack * bool =
             let top_frame = 
               (match stack1 with
               | hd::tl -> hd) in 
-            interp coms (top_frame::stack') envs))
+            (match !tw_stack with
+            | true :: tl -> (stack1, false)
+            | _ -> interp coms (top_frame::stack') envs)))
     | N a, N fname ->
       (match search_envs a envs, search_envs fname envs with
       | Some v, Some (C (arg, coms', envs') as clos) ->
@@ -1172,7 +1176,9 @@ let rec interp coms stack (envs: env_lst): stack * bool =
           let top_frame = 
             (match stack1 with
             | hd::tl -> hd) in 
-          interp coms (top_frame::stack') envs)
+          (match !tw_stack with
+          | true :: tl -> (stack1, false)
+          | _ -> interp coms (top_frame::stack') envs))
       | _ -> 
         (match !tw_stack with
         | hd :: tl -> tw_stack := true :: tl; (stack, false)
@@ -1191,7 +1197,9 @@ let rec interp coms stack (envs: env_lst): stack * bool =
           let top_frame = 
             (match stack1 with 
             | hd::tl -> hd) in 
-          interp coms (top_frame::stack') envs)
+          (match !tw_stack with
+          | true :: tl -> (stack1, false)
+          | _ -> interp coms (top_frame::stack') envs))
       | _ -> 
         (match !tw_stack with
         | hd :: tl -> tw_stack := true :: tl; (stack, false)
@@ -1211,9 +1219,10 @@ let rec interp coms stack (envs: env_lst): stack * bool =
     if quit then (stack1, true) else 
     let top_frame = 
       (match stack1 with
-      | hd :: tl -> hd) in 
+      | hd :: tl -> hd
+      ) in 
     (match !tw_stack with
-    | false :: tl -> tw_stack := tl; interp coms (top_frame::stack) envs
+    | false :: tl -> tw_stack := tl; interp coms (top_frame :: stack) envs
     | true :: tl -> 
       tw_stack := tl; 
       let new_envs = [] :: envs in 
@@ -1221,15 +1230,16 @@ let rec interp coms stack (envs: env_lst): stack * bool =
       if quit then (stack1, true) else 
       let top_frame = 
         (match stack1 with
-        | hd :: tl -> hd) in 
+        | hd :: tl -> hd
+        ) in 
       (match !tw_stack with
       | true :: tl -> (stack1, false)
-      | _ -> interp coms (top_frame::stack) envs))
+      | _ -> interp coms (top_frame :: stack) envs))
   | Quit :: coms, _ -> stack, true
   | [], _ -> stack, false
   | _ :: coms, _ ->
     (match !tw_stack with
-    | hd :: tl -> tw_stack := true :: tl; (stack, false)
+    | hd :: tl -> tw_stack := true :: tl; (E :: stack, false)
     | [] -> interp coms (E :: stack) envs)
 
 (* testing *)
